@@ -4,7 +4,13 @@ const redisService = require("../utils/redisService");
 
 const auth = async (req, res, next) => {
   try {
-    const token = req.header("Authorization")?.replace("Bearer ", "");
+    // Check token in header first
+    let token = req.header("Authorization")?.replace("Bearer ", "");
+
+    // Fallback: check token in query string
+    if (!token && req.query.token) {
+      token = req.query.token;
+    }
 
     if (!token) {
       return res.status(401).json({
