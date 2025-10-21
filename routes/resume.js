@@ -25,7 +25,7 @@ router.post(
       form.append("job_description", req.body.job_description);
     try {
       const flaskRes = await axios.post(
-        "https://resumeserver.skillara.asia/api/generate-resume",
+        `${process.env.RESUME_SERVER_FLASK}/api/generate-resume`,
         form,
         {
           headers: {
@@ -49,7 +49,7 @@ router.post(
 router.get("/:resume_id", verifyAuthToken, async (req, res) => {
   const flaskResponse = await callFlaskAPI({
     method: "GET",
-    url: `https://resumeserver.skillara.asia/api/resume/${req.params.resume_id}`,
+    url: `${process.env.RESUME_SERVER_FLASK}/api/resume/${req.params.resume_id}`,
     headers: { Authorization: req.header("Authorization") },
   });
   res.status(flaskResponse.status).json(flaskResponse.data);
@@ -59,7 +59,7 @@ router.get("/:resume_id", verifyAuthToken, async (req, res) => {
 router.get("/user-resumes", verifyAuthToken, async (req, res) => {
   const flaskResponse = await callFlaskAPI({
     method: "GET",
-    url: "https://resumeserver.skillara.asia/api/user-resumes",
+    url: `${process.env.RESUME_SERVER_FLASK}/api/user-resumes`,
     headers: { Authorization: req.header("Authorization") },
   });
   res.status(flaskResponse.status).json(flaskResponse.data);
