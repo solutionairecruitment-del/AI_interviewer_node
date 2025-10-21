@@ -25,7 +25,7 @@ router.post(
       form.append("target_language", req.body.target_language);
     try {
       const flaskRes = await axios.post(
-        "https://contentserver.skillara.asia/api/transcribe",
+        `${process.env.CONTENT_SERVER_FLASK}/api/transcribe`,
         form,
         {
           headers: {
@@ -60,7 +60,7 @@ router.post(
       form.append("target_language", req.body.target_language);
     try {
       const flaskRes = await axios.post(
-        "https://contentserver.skillara.asia/api/transcribelink",
+        `${process.env.CONTENT_SERVER_FLASK}/api/transcribelink`,
         form,
         {
           headers: {
@@ -82,7 +82,7 @@ router.post(
 router.get("/summary", verifyAuthToken, async (req, res) => {
   const flaskResponse = await callFlaskAPI({
     method: "GET",
-    url: "https://contentserver.skillara.asia/api/summary",
+    url: `${process.env.CONTENT_SERVER_FLASK}/api/summary`,
     headers: { Authorization: req.header("Authorization") },
   });
   res.status(flaskResponse.status).json(flaskResponse.data);
@@ -92,7 +92,7 @@ router.get("/summary", verifyAuthToken, async (req, res) => {
 router.get("/flashcards", verifyAuthToken, async (req, res) => {
   const flaskResponse = await callFlaskAPI({
     method: "GET",
-    url: "https://contentserver.skillara.asia/api/flashcards",
+    url: `${process.env.CONTENT_SERVER_FLASK}/api/flashcards`,
     headers: { Authorization: req.header("Authorization") },
   });
   res.status(flaskResponse.status).json(flaskResponse.data);
@@ -102,7 +102,7 @@ router.get("/flashcards", verifyAuthToken, async (req, res) => {
 router.get("/quiz", verifyAuthToken, async (req, res) => {
   const flaskResponse = await callFlaskAPI({
     method: "GET",
-    url: "https://contentserver.skillara.asia/api/quiz",
+    url: `${process.env.CONTENT_SERVER_FLASK}/api/quiz`,
     headers: { Authorization: req.header("Authorization") },
   });
   res.status(flaskResponse.status).json(flaskResponse.data);
@@ -112,7 +112,7 @@ router.get("/quiz", verifyAuthToken, async (req, res) => {
 router.get("/exercise", verifyAuthToken, async (req, res) => {
   const flaskResponse = await callFlaskAPI({
     method: "GET",
-    url: "https://contentserver.skillara.asia/api/exercise",
+    url: `${process.env.CONTENT_SERVER_FLASK}/api/exercise`,
     headers: { Authorization: req.header("Authorization") },
   });
   res.status(flaskResponse.status).json(flaskResponse.data);
@@ -134,7 +134,7 @@ router.post(
       form.append("target_language", req.body.target_language);
     try {
       const flaskRes = await axios.post(
-        "https://contentserver.skillara.asia/api/generate-note",
+        `${process.env.CONTENT_SERVER_FLASK}/api/generate-note`,
         form,
         {
           headers: {
@@ -158,7 +158,7 @@ router.post(
 router.get("/user/transcriptions", verifyAuthToken, async (req, res) => {
   const flaskResponse = await callFlaskAPI({
     method: "GET",
-    url: "https://contentserver.skillara.asia/api/user/transcriptions",
+    url: `${process.env.CONTENT_SERVER_FLASK}/api/user/transcriptions`,
     headers: { Authorization: req.header("Authorization") },
   });
   res.status(flaskResponse.status).json(flaskResponse.data);
@@ -168,7 +168,7 @@ router.get("/user/transcriptions", verifyAuthToken, async (req, res) => {
 router.get("/user/notes", verifyAuthToken, async (req, res) => {
   const flaskResponse = await callFlaskAPI({
     method: "GET",
-    url: "https://contentserver.skillara.asia/api/user/notes",
+    url: `${process.env.CONTENT_SERVER_FLASK}/api/user/notes`,
     headers: { Authorization: req.header("Authorization") },
   });
   res.status(flaskResponse.status).json(flaskResponse.data);
@@ -178,7 +178,7 @@ router.get("/user/notes", verifyAuthToken, async (req, res) => {
 router.get("/user/history", verifyAuthToken, async (req, res) => {
   const flaskResponse = await callFlaskAPI({
     method: "GET",
-    url: "https://contentserver.skillara.asia/api/user/history",
+    url: `${process.env.CONTENT_SERVER_FLASK}/api/user/history`,
     headers: { Authorization: req.header("Authorization") },
   });
   res.status(flaskResponse.status).json(flaskResponse.data);
@@ -191,7 +191,7 @@ router.get(
   async (req, res) => {
     const flaskResponse = await callFlaskAPI({
       method: "GET",
-      url: `https://contentserver.skillara.asia/api/transcription/${req.params.transcription_id}`,
+      url: `${process.env.CONTENT_SERVER_FLASK}/api/transcription/${req.params.transcription_id}`,
       headers: { Authorization: req.header("Authorization") },
     });
     res.status(flaskResponse.status).json(flaskResponse.data);
@@ -202,7 +202,7 @@ router.get(
 router.get("/note/:note_id", verifyAuthToken, async (req, res) => {
   const flaskResponse = await callFlaskAPI({
     method: "GET",
-    url: `https://contentserver.skillara.asia/api/note/${req.params.note_id}`,
+    url: `${process.env.CONTENT_SERVER_FLASK}/api/note/${req.params.note_id}`,
     headers: { Authorization: req.header("Authorization") },
   });
   res.status(flaskResponse.status).json(flaskResponse.data);
@@ -215,7 +215,7 @@ router.get(
   async (req, res) => {
     const flaskResponse = await callFlaskAPI({
       method: "GET",
-      url: `https://contentserver.skillara.asia/api/transcription/${req.params.transcription_id}/summary`,
+      url: `${process.env.CONTENT_SERVER_FLASK}/api/transcription/${req.params.transcription_id}/summary`,
       headers: { Authorization: req.header("Authorization") },
     });
     res.status(flaskResponse.status).json(flaskResponse.data);
@@ -229,7 +229,7 @@ router.get(
   async (req, res) => {
     const flaskResponse = await callFlaskAPI({
       method: "GET",
-      url: `https://contentserver.skillara.asia/api/transcription/${req.params.transcription_id}/flashcards`,
+      url: `${process.env.CONTENT_SERVER_FLASK}/api/transcription/${req.params.transcription_id}/flashcards`,
       headers: { Authorization: req.header("Authorization") },
     });
     res.status(flaskResponse.status).json(flaskResponse.data);
@@ -243,7 +243,7 @@ router.get(
   async (req, res) => {
     const flaskResponse = await callFlaskAPI({
       method: "GET",
-      url: `https://contentserver.skillara.asia/api/transcription/${req.params.transcription_id}/quiz`,
+      url: `${process.env.CONTENT_SERVER_FLASK}/api/transcription/${req.params.transcription_id}/quiz`,
       headers: { Authorization: req.header("Authorization") },
     });
     res.status(flaskResponse.status).json(flaskResponse.data);
@@ -257,7 +257,7 @@ router.get(
   async (req, res) => {
     const flaskResponse = await callFlaskAPI({
       method: "GET",
-      url: `https://contentserver.skillara.asia/api/transcription/${req.params.transcription_id}/exercises`,
+      url: `${process.env.CONTENT_SERVER_FLASK}/api/transcription/${req.params.transcription_id}/exercises`,
       headers: { Authorization: req.header("Authorization") },
     });
     res.status(flaskResponse.status).json(flaskResponse.data);
@@ -271,7 +271,7 @@ router.post(
   async (req, res) => {
     const flaskResponse = await callFlaskAPI({
       method: "POST",
-      url: `https://contentserver.skillara.asia/api/transcription/${req.params.transcription_id}/regenerate/${req.params.content_type}`,
+      url: `${process.env.CONTENT_SERVER_FLASK}/api/transcription/${req.params.transcription_id}/regenerate/${req.params.content_type}`,
       headers: { Authorization: req.header("Authorization") },
       body: req.body,
     });
