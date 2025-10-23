@@ -1,9 +1,9 @@
-name: Build and Deploy to Google Cloud Platform Cloud
+name: Build and Deploy to GCP Cloud Run
 
 on:
   push:
     branches:
-      - release-1.0
+      - release
 
 jobs:
   build_and_deploy:
@@ -13,19 +13,27 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          export_default_credentials: true
 
-      - name: Set default project and region
+      - name: Confirm auth and project
         run: |
+          gcloud auth list
           gcloud config set project "${{ secrets.GCP_PROJECT_ID }}"
-          gcloud config set run/region "asia-south1"
 
-      - name: Ensure Artifact Registry repo exists 
+      - name: Enable required APIs (idempotent)
+        run: |
+          gcloud services enable artifactregistry.googleapis.com
+          gcloud services enable run.googleapis.com
+
+      - name: Ensure Artifact Registry repo exists (idempotent)
         run: |
           set -e
           REPO="ai-interviewer-repo"
@@ -37,33 +45,28 @@ jobs:
               --description="Docker repo for ai-interviewer"
           fi
 
-      - name: Configure Docker for Artifact Registry
+      - name: Configure Docker for Google Artifact Registry
         run: |
           gcloud auth configure-docker asia-south1-docker.pkg.dev
 
-      - name: Build image
+      - name: Build and push Docker image to Artifact Registry
         run: |
-          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/demo-deployment-repo/ai-interviewer"
+          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ai-interviewer-repo/ai-interviewer"
           docker build -t "$IMAGE:$GITHUB_SHA" -t "$IMAGE:latest" .
-
-      - name: Push image
-        run: |
-          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/demo-deployment-repo/ai-interviewer"
           docker push "$IMAGE:$GITHUB_SHA"
           docker push "$IMAGE:latest"
 
-      - name: Deploy to Cloud Run 
+      - name: Deploy to Cloud Run (public)
         run: |
-          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/demo-deployment-repo/ai-interviewer:$GITHUB_SHA"
+          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ai-interviewer-repo/ai-interviewer:$GITHUB_SHA"
           gcloud run deploy ai-interviewer \
             --image "$IMAGE" \
             --platform managed \
             --region asia-south1 \
             --allow-unauthenticated \
-            --port 5000 \
+            --port 3000 \
             --quiet
 
       - name: Output service URL
         run: |
-          URL="$(gcloud run services describe ai-interviewer --region asia-south1 --format='value(status.url)')"
-          echo "Cloud Run URL: $URL"
+          gcloud run services describe ai-interviewer --region asia-south1 --format='value(status.url)'
