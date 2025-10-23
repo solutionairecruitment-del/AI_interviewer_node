@@ -54,7 +54,7 @@ jobs:
       - name: Deploy to Cloud Run (public)
         run: |
           IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/demo-deployment-repo/ai-interviewer:$GITHUB_SHA"
-          gcloud run deploy ai-interviewer \
+          gcloud run deploy nodejs-interview-backend \
             --image "$IMAGE" \
             --platform managed \
             --region asia-south1 \
