@@ -31,7 +31,7 @@ jobs:
       - name: Ensure Artifact Registry repo exists (idempotent)
         run: |
           set -e
-          REPO="ai-interviewer-repo"
+          REPO="demo-deployment-repo"
           LOCATION="asia-south1"
           if ! gcloud artifacts repositories describe "$REPO" --location="$LOCATION" >/dev/null 2>&1; then
             gcloud artifacts repositories create "$REPO" \
@@ -46,14 +46,14 @@ jobs:
 
       - name: Build and push Docker image to Artifact Registry
         run: |
-          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ai-interviewer-repo/ai-interviewer"
+          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/demo-deployment-repo/ai-interviewer"
           docker build -t "$IMAGE:$GITHUB_SHA" -t "$IMAGE:latest" .
           docker push "$IMAGE:$GITHUB_SHA"
           docker push "$IMAGE:latest"
 
       - name: Deploy to Cloud Run (public)
         run: |
-          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/ai-interviewer-repo/ai-interviewer:$GITHUB_SHA"
+          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/demo-deployment-repo/ai-interviewer:$GITHUB_SHA"
           gcloud run deploy ai-interviewer \
             --image "$IMAGE" \
             --platform managed \
