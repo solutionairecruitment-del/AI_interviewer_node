@@ -69,7 +69,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {
-  res.send("Welcome to the AI Interviewer API");
+  res.send("Welcome to the AI Interviewer API CI/CD");
 });
 
 // Error handling middleware
@@ -98,3 +98,4 @@ app.listen(process.env.PORT || 3000, () => {
 });
 
 module.exports = app;
+
