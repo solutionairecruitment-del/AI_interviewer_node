@@ -28,11 +28,6 @@ jobs:
           gcloud auth list
           gcloud config set project "${{ secrets.GCP_PROJECT_ID }}"
 
-      - name: Enable required APIs (idempotent)
-        run: |
-          gcloud services enable artifactregistry.googleapis.com
-          gcloud services enable run.googleapis.com
-
       - name: Ensure Artifact Registry repo exists (idempotent)
         run: |
           set -e
