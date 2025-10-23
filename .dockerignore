@@ -1,0 +1,12 @@
+.git
+.gitignore
+node_modules
+npm-debug.log
+yarn.lock
+pnpm-lock.yaml
+Dockerfile
+docker-compose.yml
+.env
+.env.local
+*.log
+# keep uploads (mounted as volume at runtime)
