@@ -1,49 +1,74 @@
-name: GCP CI/CD
+name: Build and Deploy to GCP Cloud Run
 
 on:
   push:
-    branches: [ main ]
-
-env:
-  PROJECT_ID: your-gcp-project-id
-  REGION: us-central1
-  SERVICE_NAME: ai-interviewer
+    branches:
+      - release-1.0
 
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
+
     steps:
-      - name: Checkout code
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
+        uses: google-github-actions/setup-gcloud@v2
         with:
-          project_id: ${{ env.PROJECT_ID }}
-          export_default_credentials: true
           service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          export_default_credentials: true
 
-      - name: Configure Docker for GCR authentication
-        run: | 
-          gcloud auth configure-docker
-
-      - name: Build Docker image
+      - name: Set default project and region
         run: |
-          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:latest .
+          gcloud config set project "${{ secrets.GCP_PROJECT_ID }}"
+          gcloud config set run/region "asia-south1"
 
-      - name: Push Docker image to Google Container Registry
+      - name: Enable required APIs 
         run: |
-          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:latest
+          gcloud services enable artifactregistry.googleapis.com
+          gcloud services enable run.googleapis.com
 
-      - name: Deploy to Cloud Run
+      - name: Ensure Artifact Registry repo exists 
         run: |
-          gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:latest \
+          set -e
+          REPO="ai-interviewer-repo"
+          LOCATION="asia-south1"
+          if ! gcloud artifacts repositories describe "$REPO" --location="$LOCATION" >/dev/null 2>&1; then
+            gcloud artifacts repositories create "$REPO" \
+              --repository-format=docker \
+              --location="$LOCATION" \
+              --description="Docker repo for ai-interviewer"
+          fi
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker asia-south1-docker.pkg.dev
+
+      - name: Build image
+        run: |
+          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/demo-deployment-repo/ai-interviewer"
+          docker build -t "$IMAGE:$GITHUB_SHA" -t "$IMAGE:latest" .
+
+      - name: Push image
+        run: |
+          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/demo-deployment-repo/ai-interviewer"
+          docker push "$IMAGE:$GITHUB_SHA"
+          docker push "$IMAGE:latest"
+
+      - name: Deploy to Cloud Run 
+        run: |
+          IMAGE="asia-south1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/demo-deployment-repo/ai-interviewer:$GITHUB_SHA"
+          gcloud run deploy ai-interviewer \
+            --image "$IMAGE" \
             --platform managed \
-            --region ${{ env.REGION }} \
+            --region asia-south1 \
             --allow-unauthenticated \
-            --port 3000 \
+            --port 5000 \
             --quiet
+
+      - name: Output service URL
+        run: |
+          URL="$(gcloud run services describe ai-interviewer --region asia-south1 --format='value(status.url)')"
+          echo "Cloud Run URL: $URL"
