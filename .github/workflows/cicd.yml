@@ -64,4 +64,4 @@ jobs:
 
       - name: Output service URL
         run: |
-          gcloud run services describe ai-interviewer --region asia-south1 --format='value(status.url)'
+          gcloud run services describe nodejs-interview-backend --region asia-south1 --format='value(status.url)'
